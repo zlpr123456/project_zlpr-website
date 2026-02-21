@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食谱详情 - 纸上滑雪的家庭食谱</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="recipe-styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🍳 纸上滑雪的家庭食谱</h1>
+            <p class="subtitle">记录和分享美味佳肴</p>
+        </div>
+    </header>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <a href="recipes.html" class="nav-link">📖 食谱列表</a>
+            <a href="create-recipe.html" class="nav-link">➕ 创建食谱</a>
+            <a href="favorites.html" class="nav-link">⭐ 我的收藏</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div id="recipeDetail">
+            <div class="loading">加载中...</div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 纸上滑雪的家庭食谱. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="recipe-api.js"></script>
+    <script>
+        async function loadRecipeDetail() {
+            const params = new URLSearchParams(window.location.search);
+            const recipeId = params.get('id');
+            
+            if (!recipeId) {
+                window.location.href = 'recipes.html';
+                return;
+            }
+
+            const container = document.getElementById('recipeDetail');
+            
+            try {
+                const recipe = await getRecipeById(recipeId);
+                const images = await getRecipeImages(recipeId);
+                const isFavorite = await checkFavorite(recipeId);
+
+                const coverImage = images.find(img => img.is_cover) || images[0];
+
+                container.innerHTML = `
+                    <div class="recipe-detail">
+                        <div class="recipe-header">
+                            <button onclick="window.location.href='recipes.html'" class="btn btn-secondary">← 返回列表</button>
+                            <button onclick="toggleFavorite(${recipeId})" class="btn ${isFavorite ? 'btn-favorite-active' : 'btn-favorite'}">
+                                ${isFavorite ? '⭐ 已收藏' : '☆ 收藏'}
+                            </button>
+                        </div>
+
+                        <div class="recipe-cover">
+                            ${coverImage ? 
+                                `<img src="${coverImage.r2_url}" alt="${recipe.title}" class="cover-image">` :
+                                `<div class="no-cover-image">暂无图片</div>`
+                            }
+                        </div>
+
+                        <div class="recipe-content">
+                            <h1 class="recipe-title">${recipe.title}</h1>
+                            <p class="recipe-description">${recipe.description || '暂无描述'}</p>
+
+                            <div class="recipe-meta-info">
+                                <div class="meta-info-item">
+                                    <span class="meta-icon">⏱️</span>
+                                    <span class="meta-label">烹饪时间</span>
+                                    <span class="meta-value">${recipe.cooking_time || '未知'}分钟</span>
+                                </div>
+                                <div class="meta-info-item">
+                                    <span class="meta-icon">👥</span>
+                                    <span class="meta-label">份量</span>
+                                    <span class="meta-value">${recipe.servings || '未知'}人份</span>
+                                </div>
+                                <div class="meta-info-item">
+                                    <span class="meta-icon">📊</span>
+                                    <span class="meta-label">难度</span>
+                                    <span class="meta-value">${recipe.difficulty}</span>
+                                </div>
+                                <div class="meta-info-item">
+                                    <span class="meta-icon">📂</span>
+                                    <span class="meta-label">分类</span>
+                                    <span class="meta-value">${recipe.category || '未分类'}</span>
+                                </div>
+                                <div class="meta-info-item">
+                                    <span class="meta-icon">📅</span>
+                                    <span class="meta-label">创建时间</span>
+                                    <span class="meta-value">${formatDate(recipe.created_at)}</span>
+                                </div>
+                            </div>
+
+                            <div class="recipe-tags">
+                                ${recipe.tags ? recipe.tags.split(',').map(tag => 
+                                    `<span class="tag">${tag.trim()}</span>`
+                                ).join('') : ''}
+                            </div>
+
+                            <div class="recipe-section">
+                                <h2>🥘 所需食材</h2>
+                                <div class="ingredients-list">
+                                    ${recipe.ingredients.split('\n').map(ingredient => 
+                                        ingredient.trim() ? `<div class="ingredient-item">• ${ingredient}</div>` : ''
+                                    ).join('')}
+                                </div>
+                            </div>
+
+                            <div class="recipe-section">
+                                <h2>📝 制作步骤</h2>
+                                <div class="instructions-list">
+                                    ${recipe.instructions.split('\n').map((instruction, index) => 
+                                        instruction.trim() ? `
+                                            <div class="instruction-item">
+                                                <div class="instruction-number">${index + 1}</div>
+                                                <div class="instruction-text">${instruction}</div>
+                                            </div>
+                                        ` : ''
+                                    ).join('')}
+                                </div>
+                            </div>
+
+                            ${images.length > 1 ? `
+                                <div class="recipe-section">
+                                    <h2>📷 更多图片</h2>
+                                    <div class="recipe-images">
+                                        ${images.map(img => `
+                                            <img src="${img.r2_url}" alt="${recipe.title}" class="recipe-image-thumb" onclick="showImage('${img.r2_url}')">
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="recipe-actions">
+                                <button onclick="editRecipe(${recipe.id})" class="btn btn-primary">✏️ 编辑食谱</button>
+                                <button onclick="deleteRecipe(${recipe.id})" class="btn btn-danger">🗑️ 删除食谱</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('加载食谱详情失败:', error);
+                container.innerHTML = '<div class="error">加载失败，请刷新重试</div>';
+            }
+        }
+
+        async function toggleFavorite(recipeId) {
+            try {
+                const isFavorite = await checkFavorite(recipeId);
+                if (isFavorite) {
+                    await removeFavorite(recipeId);
+                    alert('已取消收藏');
+                } else {
+                    await addFavorite(recipeId);
+                    alert('已添加到收藏');
+                }
+                loadRecipeDetail();
+            } catch (error) {
+                console.error('收藏操作失败:', error);
+                alert('操作失败，请重试');
+            }
+        }
+
+        function editRecipe(id) {
+            window.location.href = `create-recipe.html?id=${id}`;
+        }
+
+        async function deleteRecipe(id) {
+            if (confirm('确定要删除这个食谱吗？此操作不可恢复。')) {
+                try {
+                    await deleteRecipeAPI(id);
+                    alert('删除成功');
+                    window.location.href = 'recipes.html';
+                } catch (error) {
+                    console.error('删除失败:', error);
+                    alert('删除失败，请重试');
+                }
+            }
+        }
+
+        function showImage(url) {
+            window.open(url, '_blank');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        loadRecipeDetail();
+    </script>
+</body>
+</html>

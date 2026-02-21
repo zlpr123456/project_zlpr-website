@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的收藏 - 纸上滑雪的家庭食谱</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="recipe-styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🍳 纸上滑雪的家庭食谱</h1>
+            <p class="subtitle">记录和分享美味佳肴</p>
+        </div>
+    </header>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <a href="recipes.html" class="nav-link">📖 食谱列表</a>
+            <a href="create-recipe.html" class="nav-link">➕ 创建食谱</a>
+            <a href="favorites.html" class="nav-link active">⭐ 我的收藏</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="page-header">
+            <h1>⭐ 我的收藏</h1>
+            <p class="subtitle">收藏的美食食谱</p>
+        </section>
+
+        <section class="recipes-grid" id="favoritesGrid">
+            <div class="loading">加载中...</div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 纸上滑雪的家庭食谱. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="recipe-api.js"></script>
+    <script>
+        async function loadFavorites() {
+            const grid = document.getElementById('favoritesGrid');
+            grid.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                const favorites = await getFavorites();
+
+                if (favorites.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">⭐</div>
+                            <p>暂无收藏</p>
+                            <p>去食谱列表收藏一些喜欢的食谱吧！</p>
+                            <a href="recipes.html" class="btn btn-primary">浏览食谱</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = favorites.map(favorite => `
+                    <div class="recipe-card" onclick="viewRecipe(${favorite.id})">
+                        <div class="recipe-image">
+                            ${favorite.cover_image ? 
+                                `<img src="${favorite.cover_image}" alt="${favorite.title}" onerror="this.src='https://via.placeholder.com/400x300?text=暂无图片'">` :
+                                `<div class="no-image">暂无图片</div>`
+                            }
+                            <div class="recipe-badge">${favorite.difficulty}</div>
+                            <button onclick="event.stopPropagation(); removeFavorite(${favorite.id})" class="btn btn-remove-favorite">
+                                ✕
+                            </button>
+                        </div>
+                        <div class="recipe-info">
+                            <h3 class="recipe-title">${favorite.title}</h3>
+                            <p class="recipe-description">${favorite.description || '暂无描述'}</p>
+                            <div class="recipe-meta">
+                                <span class="meta-item">⏱️ ${favorite.cooking_time || '未知'}分钟</span>
+                                <span class="meta-item">👥 ${favorite.servings || '未知'}人份</span>
+                            </div>
+                            <div class="recipe-tags">
+                                ${favorite.tags ? favorite.tags.split(',').map(tag => 
+                                    `<span class="tag">${tag.trim()}</span>`
+                                ).join('') : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('加载收藏失败:', error);
+                grid.innerHTML = '<div class="error">加载失败，请刷新重试</div>';
+            }
+        }
+
+        function viewRecipe(id) {
+            window.location.href = `recipe-detail.html?id=${id}`;
+        }
+
+        async function removeFavorite(recipeId) {
+            if (confirm('确定要取消收藏这个食谱吗？')) {
+                try {
+                    await removeFavoriteAPI(recipeId);
+                    alert('已取消收藏');
+                    loadFavorites();
+                } catch (error) {
+                    console.error('取消收藏失败:', error);
+                    alert('操作失败，请重试');
+                }
+            }
+        }
+
+        loadFavorites();
+    </script>
+</body>
+</html>

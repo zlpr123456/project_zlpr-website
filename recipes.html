@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纸上滑雪的家庭食谱</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="recipe-styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🍳 纸上滑雪的家庭食谱</h1>
+            <p class="subtitle">记录和分享美味佳肴</p>
+        </div>
+    </header>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <a href="index.html" class="nav-link active">📖 食谱列表</a>
+            <a href="create-recipe.html" class="nav-link">➕ 创建食谱</a>
+            <a href="favorites.html" class="nav-link">⭐ 我的收藏</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索食谱..." class="search-input">
+                <button onclick="searchRecipes()" class="btn btn-primary">🔍 搜索</button>
+            </div>
+            <div class="filter-buttons">
+                <button onclick="filterByCategory('all')" class="btn btn-secondary filter-btn active">全部</button>
+                <button onclick="filterByCategory('家常菜')" class="btn btn-secondary filter-btn">家常菜</button>
+                <button onclick="filterByCategory('甜点')" class="btn btn-secondary filter-btn">甜点</button>
+                <button onclick="filterByCategory('汤品')" class="btn btn-secondary filter-btn">汤品</button>
+                <button onclick="filterByCategory('主食')" class="btn btn-secondary filter-btn">主食</button>
+            </div>
+        </section>
+
+        <section class="recipes-grid" id="recipesGrid">
+            <div class="loading">加载中...</div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 纸上滑雪的家庭食谱. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="recipe-api.js"></script>
+    <script>
+        let currentCategory = 'all';
+        let currentSearch = '';
+
+        async function loadRecipes() {
+            const grid = document.getElementById('recipesGrid');
+            grid.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                let recipes = [];
+                if (currentSearch) {
+                    recipes = await searchRecipesAPI(currentSearch);
+                } else if (currentCategory === 'all') {
+                    recipes = await getAllRecipes();
+                } else {
+                    recipes = await getRecipesByCategory(currentCategory);
+                }
+
+                if (recipes.length === 0) {
+                    grid.innerHTML = '<div class="empty-state">暂无食谱</div>';
+                    return;
+                }
+
+                grid.innerHTML = recipes.map(recipe => `
+                    <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
+                        <div class="recipe-image">
+                            ${recipe.cover_image ? 
+                                `<img src="${recipe.cover_image}" alt="${recipe.title}" onerror="this.src='https://via.placeholder.com/400x300?text=暂无图片'">` :
+                                `<div class="no-image">暂无图片</div>`
+                            }
+                            <div class="recipe-badge">${recipe.difficulty}</div>
+                        </div>
+                        <div class="recipe-info">
+                            <h3 class="recipe-title">${recipe.title}</h3>
+                            <p class="recipe-description">${recipe.description || '暂无描述'}</p>
+                            <div class="recipe-meta">
+                                <span class="meta-item">⏱️ ${recipe.cooking_time || '未知'}分钟</span>
+                                <span class="meta-item">👥 ${recipe.servings || '未知'}人份</span>
+                                <span class="meta-item">📅 ${formatDate(recipe.created_at)}</span>
+                            </div>
+                            <div class="recipe-tags">
+                                ${recipe.tags ? recipe.tags.split(',').map(tag => 
+                                    `<span class="tag">${tag.trim()}</span>`
+                                ).join('') : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('加载食谱失败:', error);
+                grid.innerHTML = '<div class="error">加载失败，请刷新重试</div>';
+            }
+        }
+
+        function viewRecipe(id) {
+            window.location.href = `recipe-detail.html?id=${id}`;
+        }
+
+        function searchRecipes() {
+            currentSearch = document.getElementById('searchInput').value;
+            loadRecipes();
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            currentSearch = '';
+            document.getElementById('searchInput').value = '';
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            loadRecipes();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecipes();
+            }
+        });
+
+        loadRecipes();
+    </script>
+</body>
+</html>
