@@ -135,9 +135,20 @@ async function uploadRecipeImage(recipeId, file, isCover = false, thumbnail = nu
 }
 
 async function deleteRecipeImage(recipeId, imageId) {
-    await request(`/recipes/${recipeId}/images/${imageId}`, {
+    const response = await fetch(`${API_BASE}/recipes/${recipeId}/images/${imageId}`, {
         method: 'DELETE'
     });
+    
+    if (!response.ok) {
+        try {
+            const error = await response.json();
+            throw new Error(error.error || '请求失败');
+        } catch (jsonError) {
+            throw new Error('请求失败: ' + response.statusText);
+        }
+    }
+    
+    return true;
 }
 
 async function getFavorites() {

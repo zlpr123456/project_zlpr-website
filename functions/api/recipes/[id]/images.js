@@ -165,10 +165,8 @@ export async function onRequestDELETE(context) {
       }
     }
     
-    return new Response(JSON.stringify({
-      success: true,
-      message: '图片删除成功'
-    }), {
+    return new Response(null, {
+      status: 204,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
