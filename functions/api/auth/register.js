@@ -2,7 +2,20 @@ export async function onRequestPost(context) {
     try {
         const { request, env } = context;
         const body = await request.json();
-        const { username, password } = body;
+        const { username, password, inviteCode } = body;
+
+        // 验证邀请码
+        if (inviteCode !== '1201') {
+            return new Response(JSON.stringify({
+                success: false,
+                error: '邀请码错误'
+            }), {
+                status: 400,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        }
 
         // 验证输入
         if (!username || !password) {

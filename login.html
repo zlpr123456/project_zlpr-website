@@ -178,6 +178,11 @@
                 <div id="registerMessage"></div>
                 
                 <div class="form-group">
+                    <label for="inviteCode">邀请码</label>
+                    <input type="text" id="inviteCode" name="inviteCode" required placeholder="请输入邀请码">
+                </div>
+                
+                <div class="form-group">
                     <label for="registerUsername">用户名</label>
                     <input type="text" id="registerUsername" name="username" required placeholder="请输入用户名">
                 </div>
@@ -270,9 +275,15 @@
         async function handleRegister(event) {
             event.preventDefault();
             
+            const inviteCode = document.getElementById('inviteCode').value;
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (inviteCode !== '1201') {
+                showMessage('registerMessage', '邀请码错误', true);
+                return;
+            }
 
             if (password.length < 6) {
                 showMessage('registerMessage', '密码长度至少为6位', true);
@@ -290,7 +301,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, inviteCode })
                 });
 
                 const result = await response.json();
