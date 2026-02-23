@@ -56,8 +56,8 @@ export async function onRequestPost(context) {
             });
         }
 
-        // 生成简单的token（生产环境应使用更安全的方法）
-        const token = btoa(`${username}:${Date.now()}`);
+        // 生成简单的token（支持UTF-8，生产环境应使用更安全的方法）
+        const token = utf8ToBase64(`${username}:${Date.now()}`);
 
         return new Response(JSON.stringify({
             success: true,
