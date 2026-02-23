@@ -68,7 +68,7 @@ export async function onRequestPost(context) {
     const key = `recipes/${recipeId}/${Date.now()}-${file.name}`;
     await env.MY_BUCKET.put(key, file);
     
-    const r2Url = `https://08202010.xyz/recipe-images/${key}`;
+    const r2Url = `https://pub-db1b21e299b684a9a8768431d11896270.r2.dev/${key}`;
     
     if (isCover) {
       await env.DB.prepare(
