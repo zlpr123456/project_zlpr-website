@@ -168,6 +168,43 @@
 
     <script src="recipe-api.js"></script>
     <script>
+        // 确保deleteRecipeImage函数可用
+        if (typeof deleteRecipeImage === 'undefined') {
+            async function deleteRecipeImage(recipeId, imageId) {
+                const API_BASE = '/api';
+                
+                async function request(endpoint, options = {}) {
+                    const url = `${API_BASE}${endpoint}`;
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    };
+
+                    if (options.body && !(options.body instanceof FormData)) {
+                        options.body = JSON.stringify(options.body);
+                    } else {
+                        delete headers['Content-Type'];
+                    }
+
+                    const response = await fetch(url, {
+                        ...options,
+                        headers
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || '请求失败');
+                    }
+
+                    return response.json();
+                }
+                
+                await request(`/recipes/${recipeId}/images/${imageId}`, {
+                    method: 'DELETE'
+                });
+            }
+        }
+        
         let selectedImages = [];
         let editingRecipeId = null;
 
@@ -246,6 +283,7 @@
                     if (images.length > 0) {
                         images.forEach(img => {
                             selectedImages.push({
+                                id: img.id,
                                 file: null,
                                 url: img.r2_url,
                                 isCover: img.is_cover
@@ -329,8 +367,24 @@
             updateImagePreview();
         }
 
-        function removeImage(index) {
+        async function removeImage(index) {
             if (!checkLogin()) return;
+            
+            const img = selectedImages[index];
+            
+            if (img.id && editingRecipeId) {
+                if (confirm('确定要删除这张图片吗？')) {
+                    try {
+                        await deleteRecipeImage(editingRecipeId, img.id);
+                    } catch (error) {
+                        console.error('删除图片失败:', error);
+                        alert('删除图片失败，请重试');
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
             
             selectedImages.splice(index, 1);
             if (selectedImages.length > 0 && !selectedImages.some(img => img.isCover)) {

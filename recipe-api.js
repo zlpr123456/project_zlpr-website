@@ -126,6 +126,12 @@ async function uploadRecipeImage(recipeId, file, isCover = false, thumbnail = nu
     });
 }
 
+async function deleteRecipeImage(recipeId, imageId) {
+    await request(`/recipes/${recipeId}/images/${imageId}`, {
+        method: 'DELETE'
+    });
+}
+
 async function getFavorites() {
     const userId = getUserId();
     const result = await request(`/favorites?user_id=${encodeURIComponent(userId)}`);
