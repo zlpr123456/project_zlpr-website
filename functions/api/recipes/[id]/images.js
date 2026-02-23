@@ -31,6 +31,65 @@ export async function onRequestPost(context) {
   try {
     const recipeId = params.id;
     const formData = await request.formData();
+    
+    // 检查是否为删除操作
+    const action = formData.get('action');
+    if (action === 'delete') {
+      const imageId = formData.get('imageId');
+      
+      if (!recipeId || !imageId) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: '缺少必要参数'
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      const image = await env.DB.prepare(
+        'SELECT r2_key, thumbnail_key FROM images WHERE id = ? AND recipe_id = ?'
+      ).bind(imageId, recipeId).first();
+      
+      if (!image) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: '图片不存在'
+        }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      await env.DB.prepare(
+        'DELETE FROM images WHERE id = ? AND recipe_id = ?'
+      ).bind(imageId, recipeId).run();
+      
+      if (image.r2_key) {
+        try {
+          await env.MY_BUCKET.delete(image.r2_key);
+        } catch (error) {
+          console.error('删除原图失败:', error);
+        }
+      }
+      
+      if (image.thumbnail_key) {
+        try {
+          await env.MY_BUCKET.delete(image.thumbnail_key);
+        } catch (error) {
+          console.error('删除缩略图失败:', error);
+        }
+      }
+      
+      return new Response(JSON.stringify({
+        success: true,
+        message: '图片删除成功'
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // 原有的上传逻辑
     const file = formData.get('file');
     const thumbnail = formData.get('thumbnail');
     const isCover = formData.get('is_cover') === '1';
@@ -103,74 +162,6 @@ export async function onRequestPost(context) {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-}
-
-export async function onRequestDELETE(context) {
-  const { env, params, request } = context;
-  
-  try {
-    const recipeId = params.id;
-    const urlParts = request.url.split('/');
-    const imageId = urlParts[urlParts.length - 1];
-    
-    if (!recipeId || !imageId) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: '缺少必要参数'
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    
-    const image = await env.DB.prepare(
-      'SELECT r2_key, thumbnail_key FROM images WHERE id = ? AND recipe_id = ?'
-    ).bind(imageId, recipeId).first();
-    
-    if (!image) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: '图片不存在'
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    
-    await env.DB.prepare(
-      'DELETE FROM images WHERE id = ? AND recipe_id = ?'
-    ).bind(imageId, recipeId).run();
-    
-    if (image.r2_key) {
-      try {
-        await env.MY_BUCKET.delete(image.r2_key);
-      } catch (error) {
-        console.error('删除原图失败:', error);
-      }
-    }
-    
-    if (image.thumbnail_key) {
-      try {
-        await env.MY_BUCKET.delete(image.thumbnail_key);
-      } catch (error) {
-        console.error('删除缩略图失败:', error);
-      }
-    }
-    
-    return new Response(null, {
-      status: 204,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    console.error('删除图片失败:', error);
     return new Response(JSON.stringify({
       success: false,
       error: error.message

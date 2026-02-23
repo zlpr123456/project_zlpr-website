@@ -171,9 +171,16 @@
         // 直接定义全局函数，确保可用
         async function deleteRecipeImage(recipeId, imageId) {
             try {
+                const formData = new FormData();
+                formData.append('action', 'delete');
+                formData.append('imageId', imageId);
+
                 const response = await fetch(
-                    `/api/recipes/${recipeId}/images/${imageId}`,
-                    { method: 'DELETE' }
+                    `/api/recipes/${recipeId}/images`,
+                    {
+                        method: 'POST',
+                        body: formData
+                    }
                 );
 
                 if (!response.ok) {

@@ -135,8 +135,13 @@ async function uploadRecipeImage(recipeId, file, isCover = false, thumbnail = nu
 }
 
 async function deleteRecipeImage(recipeId, imageId) {
-    const response = await fetch(`${API_BASE}/recipes/${recipeId}/images/${imageId}`, {
-        method: 'DELETE'
+    const formData = new FormData();
+    formData.append('action', 'delete');
+    formData.append('imageId', imageId);
+    
+    const response = await fetch(`${API_BASE}/recipes/${recipeId}/images`, {
+        method: 'POST',
+        body: formData
     });
     
     if (!response.ok) {
