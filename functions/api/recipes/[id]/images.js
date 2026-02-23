@@ -68,7 +68,7 @@ export async function onRequestPost(context) {
     const key = `recipes/${recipeId}/${Date.now()}-${file.name}`;
     await env.MY_BUCKET.put(key, file);
     
-    const r2Url = `https://${env.MY_BUCKET_ID}.r2.cloudflarestorage.com/${key}`;
+    const r2Url = `https://08202010.xyz/${key}`;
     
     if (isCover) {
       await env.DB.prepare(
