@@ -17,12 +17,13 @@ export async function onRequestGet(context) {
     
     const recipes = await Promise.all(result.results.map(async (recipe) => {
       const coverImage = await env.DB.prepare(
-        'SELECT r2_url FROM images WHERE recipe_id = ? AND is_cover = 1 LIMIT 1'
+        'SELECT r2_url, thumbnail_url FROM images WHERE recipe_id = ? AND is_cover = 1 LIMIT 1'
       ).bind(recipe.id).first();
       
       return {
         ...recipe,
-        cover_image: coverImage ? coverImage.r2_url : null
+        cover_image: coverImage ? (coverImage.thumbnail_url || coverImage.r2_url) : null,
+        original_image: coverImage ? coverImage.r2_url : null
       };
     }));
     

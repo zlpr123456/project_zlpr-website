@@ -32,6 +32,29 @@
             padding: 6px 12px;
         }
 
+        .recipe-cover {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .recipe-cover::after {
+            content: '🔍 点击查看原图';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .recipe-cover:hover::after {
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
             .main-nav {
                 flex-wrap: wrap;
@@ -118,9 +141,9 @@
                             </button>
                         </div>
 
-                        <div class="recipe-cover">
+                        <div class="recipe-cover" onclick="viewOriginalImage('${coverImage ? coverImage.r2_url : ''}')">
                             ${coverImage ? 
-                                `<img src="${coverImage.r2_url}" alt="${recipe.title}" class="cover-image">` :
+                                `<img src="${coverImage.thumbnail_url || coverImage.r2_url}" alt="${recipe.title}" class="cover-image">` :
                                 `<div class="no-cover-image">暂无图片</div>`
                             }
                         </div>
@@ -191,7 +214,7 @@
                                     <h2>📷 更多图片</h2>
                                     <div class="recipe-images">
                                         ${images.map(img => `
-                                            <img src="${img.r2_url}" alt="${recipe.title}" class="recipe-image-thumb" onclick="showImage('${img.r2_url}')">
+                                            <img src="${img.thumbnail_url || img.r2_url}" alt="${recipe.title}" class="recipe-image-thumb" onclick="showImage('${img.r2_url}')">
                                         `).join('')}
                                     </div>
                                 </div>
@@ -272,6 +295,13 @@
 
         function showImage(url) {
             window.open(url, '_blank');
+        }
+
+        function viewOriginalImage(url) {
+            if (!checkLogin()) return;
+            if (url) {
+                window.open(url, '_blank');
+            }
         }
 
         function formatDate(dateString) {

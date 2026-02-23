@@ -82,10 +82,13 @@ async function getRecipeImages(recipeId) {
     return result.images || [];
 }
 
-async function uploadRecipeImage(recipeId, file, isCover = false, onProgress = null) {
+async function uploadRecipeImage(recipeId, file, isCover = false, thumbnail = null, onProgress = null) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('is_cover', isCover ? '1' : '0');
+    if (thumbnail) {
+        formData.append('thumbnail', thumbnail);
+    }
 
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();

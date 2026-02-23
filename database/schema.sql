@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS images (
   recipe_id INTEGER NOT NULL,
   r2_key TEXT NOT NULL,
   r2_url TEXT NOT NULL,
+  thumbnail_key TEXT,
+  thumbnail_url TEXT,
   is_cover BOOLEAN DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE

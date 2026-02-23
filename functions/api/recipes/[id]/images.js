@@ -32,6 +32,7 @@ export async function onRequestPost(context) {
     const recipeId = params.id;
     const formData = await request.formData();
     const file = formData.get('file');
+    const thumbnail = formData.get('thumbnail');
     const isCover = formData.get('is_cover') === '1';
     
     if (!file) {
@@ -70,6 +71,15 @@ export async function onRequestPost(context) {
     
     const r2Url = `https://image.08202010.xyz/${key}`;
     
+    let thumbnailUrl = null;
+    let thumbnailKey = null;
+    
+    if (thumbnail) {
+      thumbnailKey = `recipes/${recipeId}/thumb-${Date.now()}-${file.name}`;
+      await env.MY_BUCKET.put(thumbnailKey, thumbnail);
+      thumbnailUrl = `https://image.08202010.xyz/${thumbnailKey}`;
+    }
+    
     if (isCover) {
       await env.DB.prepare(
         'UPDATE images SET is_cover = 0 WHERE recipe_id = ?'
@@ -77,15 +87,16 @@ export async function onRequestPost(context) {
     }
     
     const result = await env.DB.prepare(`
-      INSERT INTO images (recipe_id, r2_key, r2_url, is_cover)
-      VALUES (?, ?, ?, ?)
-    `).bind(recipeId, key, r2Url, isCover ? 1 : 0).run();
+      INSERT INTO images (recipe_id, r2_key, r2_url, thumbnail_key, thumbnail_url, is_cover)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(recipeId, key, r2Url, thumbnailKey, thumbnailUrl, isCover ? 1 : 0).run();
     
     return new Response(JSON.stringify({
       success: true,
       image: {
         id: result.meta.last_row_id,
         r2_url: r2Url,
+        thumbnail_url: thumbnailUrl,
         is_cover: isCover
       }
     }), {

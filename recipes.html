@@ -32,6 +32,29 @@
             padding: 6px 12px;
         }
 
+        .recipe-image {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .recipe-image::after {
+            content: '🔍 点击查看原图';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .recipe-image:hover::after {
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
             .main-nav {
                 flex-wrap: wrap;
@@ -130,7 +153,7 @@
 
                 grid.innerHTML = recipes.map(recipe => `
                     <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
-                        <div class="recipe-image">
+                        <div class="recipe-image" onclick="event.stopPropagation(); viewOriginalImage('${recipe.original_image || recipe.cover_image}')">
                             ${recipe.cover_image ? 
                                 `<img src="${recipe.cover_image}" alt="${recipe.title}" onerror="this.src='https://via.placeholder.com/400x300?text=暂无图片'">` :
                                 `<div class="no-image">暂无图片</div>`
@@ -162,6 +185,13 @@
         function viewRecipe(id) {
             if (!checkLogin()) return;
             window.location.href = `recipe-detail.html?id=${id}`;
+        }
+
+        function viewOriginalImage(url) {
+            if (!checkLogin()) return;
+            if (url) {
+                window.open(url, '_blank');
+            }
         }
 
         function searchRecipes() {

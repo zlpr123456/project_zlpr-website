@@ -16,7 +16,7 @@ export async function onRequestGet(context) {
     }
     
     const result = await env.DB.prepare(`
-      SELECT r.*, i.r2_url as cover_image
+      SELECT r.*, i.r2_url as cover_image, i.thumbnail_url, i.r2_url as original_image
       FROM recipes r
       INNER JOIN favorites f ON r.id = f.recipe_id
       LEFT JOIN images i ON r.id = i.recipe_id AND i.is_cover = 1
@@ -24,9 +24,15 @@ export async function onRequestGet(context) {
       ORDER BY f.created_at DESC
     `).bind(userId).all();
     
+    const recipes = result.results.map(recipe => ({
+      ...recipe,
+      cover_image: recipe.thumbnail_url || recipe.cover_image,
+      original_image: recipe.original_image
+    }));
+    
     return new Response(JSON.stringify({
       success: true,
-      recipes: result.results
+      recipes
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
