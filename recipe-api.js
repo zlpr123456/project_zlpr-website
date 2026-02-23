@@ -82,16 +82,45 @@ async function getRecipeImages(recipeId) {
     return result.images || [];
 }
 
-async function uploadRecipeImage(recipeId, file, isCover = false) {
+async function uploadRecipeImage(recipeId, file, isCover = false, onProgress = null) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('is_cover', isCover ? '1' : '0');
 
-    const result = await request(`/recipes/${recipeId}/images`, {
-        method: 'POST',
-        body: formData
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable && onProgress) {
+                const percentComplete = Math.round((event.loaded / event.total) * 100);
+                onProgress(percentComplete);
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    resolve(result.image);
+                } catch (error) {
+                    reject(new Error('解析响应失败'));
+                }
+            } else {
+                reject(new Error(`上传失败: ${xhr.status}`));
+            }
+        });
+
+        xhr.addEventListener('error', () => {
+            reject(new Error('网络错误'));
+        });
+
+        xhr.addEventListener('abort', () => {
+            reject(new Error('上传被取消'));
+        });
+
+        xhr.open('POST', `${API_BASE}/recipes/${recipeId}/images`);
+        xhr.send(formData);
     });
-    return result.image;
 }
 
 async function getFavorites() {

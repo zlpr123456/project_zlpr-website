@@ -321,13 +321,24 @@
 
                 if (selectedImages.length > 0) {
                     const newImages = selectedImages.filter(img => img.file);
-                    for (const img of newImages) {
-                        await uploadRecipeImage(recipeId, img.file, img.isCover);
+                    const totalImages = newImages.length;
+                    
+                    for (let i = 0; i < newImages.length; i++) {
+                        const img = newImages[i];
+                        const progress = (i / totalImages) * 100;
+                        
+                        await uploadRecipeImage(recipeId, img.file, img.isCover, (percent) => {
+                            const currentProgress = progress + (percent / totalImages);
+                            submitBtn.textContent = `上传中 ${Math.round(currentProgress)}%`;
+                        });
                     }
                 }
 
-                alert('保存成功！');
-                window.location.href = `recipe-detail.html?id=${recipeId}`;
+                submitBtn.textContent = '100%';
+                setTimeout(() => {
+                    alert('保存成功！');
+                    window.location.href = `recipe-detail.html?id=${recipeId}`;
+                }, 500);
             } catch (error) {
                 console.error('保存失败:', error);
                 // 显示具体的错误信息
