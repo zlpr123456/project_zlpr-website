@@ -5,10 +5,14 @@ export async function onRequestPost(context) {
         const { username, password, inviteCode } = body;
 
         // 验证邀请码
-        if (inviteCode !== '1201') {
+        const validInviteCode = await env.DB.prepare(
+            'SELECT * FROM invite_codes WHERE code = ? AND is_active = 1'
+        ).bind(inviteCode).first();
+
+        if (!validInviteCode) {
             return new Response(JSON.stringify({
                 success: false,
-                error: '邀请码错误'
+                error: '邀请码错误或已失效'
             }), {
                 status: 400,
                 headers: {
@@ -63,9 +67,14 @@ export async function onRequestPost(context) {
         const hashedPassword = btoa(password);
 
         // 创建新用户
-        const result = await env.DB.prepare(
+        await env.DB.prepare(
             'INSERT INTO users (username, password) VALUES (?, ?)'
         ).bind(username, hashedPassword).run();
+
+        // 更新邀请码使用次数
+        await env.DB.prepare(
+            'UPDATE invite_codes SET used_count = used_count + 1, updated_at = CURRENT_TIMESTAMP WHERE code = ?'
+        ).bind(inviteCode).run();
 
         return new Response(JSON.stringify({
             success: true,

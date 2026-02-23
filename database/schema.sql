@@ -35,6 +35,16 @@ CREATE TABLE IF NOT EXISTS images (
   FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 
+-- 邀请码表
+CREATE TABLE IF NOT EXISTS invite_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code TEXT NOT NULL UNIQUE,
+  is_active BOOLEAN DEFAULT 1,
+  used_count INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 用户表
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,3 +61,9 @@ CREATE INDEX IF NOT EXISTS idx_favorites_recipe_id ON favorites(recipe_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_images_recipe_id ON images(recipe_id);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_invite_codes_code ON invite_codes(code);
+CREATE INDEX IF NOT EXISTS idx_invite_codes_active ON invite_codes(is_active);
+
+-- 插入默认邀请码
+INSERT OR IGNORE INTO invite_codes (code, is_active, used_count) 
+VALUES ('1201', 1, 0);
