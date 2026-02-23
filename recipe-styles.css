@@ -119,7 +119,8 @@ body {
 .recipe-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background-color: #f0f0f0;
 }
 
 .recipe-image .no-image {
@@ -244,7 +245,8 @@ body {
 .cover-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background-color: #f0f0f0;
 }
 
 .no-cover-image {
@@ -378,10 +380,11 @@ body {
 .recipe-image-thumb {
     width: 100%;
     height: 150px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 10px;
     cursor: pointer;
     transition: transform 0.3s ease;
+    background-color: #f0f0f0;
 }
 
 .recipe-image-thumb:hover {
@@ -495,7 +498,8 @@ body {
 .preview-item img {
     width: 100%;
     height: 200px;
-    object-fit: cover;
+    object-fit: contain;
+    background-color: #f0f0f0;
 }
 
 .preview-item.cover {
