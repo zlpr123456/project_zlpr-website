@@ -151,6 +151,11 @@ async function deleteRecipeImage(recipeId, imageId) {
     return true;
 }
 
+// 暴露为全局函数，确保在HTML中可用
+if (typeof window !== 'undefined') {
+    window.deleteRecipeImage = deleteRecipeImage;
+}
+
 async function getFavorites() {
     const userId = getUserId();
     const result = await request(`/favorites?user_id=${encodeURIComponent(userId)}`);

@@ -168,25 +168,22 @@
 
     <script src="recipe-api.js"></script>
     <script>
-        // 确保deleteRecipeImage函数可用
-        if (typeof deleteRecipeImage === 'undefined') {
-            async function deleteRecipeImage(recipeId, imageId) {
-                const API_BASE = '/api';
-                
-                const response = await fetch(`${API_BASE}/recipes/${recipeId}/images/${imageId}`, {
-                    method: 'DELETE'
-                });
-                
+        // 直接定义全局函数，确保可用
+        async function deleteRecipeImage(recipeId, imageId) {
+            try {
+                const response = await fetch(
+                    `/api/recipes/${recipeId}/images/${imageId}`,
+                    { method: 'DELETE' }
+                );
+
                 if (!response.ok) {
-                    try {
-                        const error = await response.json();
-                        throw new Error(error.error || '请求失败');
-                    } catch (jsonError) {
-                        throw new Error('请求失败: ' + response.statusText);
-                    }
+                    throw new Error(`Delete failed: ${response.status}`);
                 }
                 
-                return true;
+                return true; // 成功
+            } catch (error) {
+                console.error("Delete image error:", error);
+                throw error; // 传递错误给调用者
             }
         }
         
