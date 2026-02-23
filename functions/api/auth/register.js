@@ -1,3 +1,11 @@
+// UTF-8安全的Base64编码函数
+function utf8ToBase64(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+    }));
+}
+
 export async function onRequestPost(context) {
     try {
         const { request, env } = context;
@@ -63,8 +71,8 @@ export async function onRequestPost(context) {
             });
         }
 
-        // 密码哈希（简单的哈希处理，生产环境应使用更安全的方法）
-        const hashedPassword = btoa(password);
+        // 密码哈希（支持UTF-8的简单哈希处理，生产环境应使用更安全的方法）
+        const hashedPassword = utf8ToBase64(password);
 
         // 创建新用户
         await env.DB.prepare(
