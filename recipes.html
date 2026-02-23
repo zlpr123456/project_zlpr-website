@@ -6,6 +6,44 @@
     <title>纸上滑雪的家庭食谱</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="recipe-styles.css">
+    <style>
+        /* 用户信息样式 */
+        .main-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .username {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .logout-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        @media (max-width: 768px) {
+            .main-nav {
+                flex-wrap: wrap;
+            }
+
+            .user-info {
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -15,6 +53,9 @@
             <nav class="main-nav">
                 <a href="index.html" class="nav-link">🏠 首页</a>
                 <a href="recipes.html" class="nav-link active">🍳 家庭食谱</a>
+                <div class="user-info" id="userInfo">
+                    <!-- 登录后显示用户信息和退出按钮 -->
+                </div>
             </nav>
         </div>
     </header>
@@ -141,6 +182,20 @@
             return new Date(dateString).toLocaleDateString('zh-CN');
         }
 
+        // 显示用户信息
+        function showUserInfo() {
+            const userInfoElement = document.getElementById('userInfo');
+            const user = localStorage.getItem('recipe_user');
+            
+            if (user) {
+                const userObj = JSON.parse(user);
+                userInfoElement.innerHTML = `
+                    <span class="username">👤 ${userObj.username}</span>
+                    <button onclick="logout()" class="btn btn-secondary logout-btn">🚪 退出</button>
+                `;
+            }
+        }
+
         // 退出登录
         function logout() {
             localStorage.removeItem('recipe_user');
@@ -151,6 +206,7 @@
         // 页面加载时检查登录状态并加载食谱
         document.addEventListener('DOMContentLoaded', function() {
             if (checkLogin()) {
+                showUserInfo();
                 loadRecipes();
             }
         });
