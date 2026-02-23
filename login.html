@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 纸上滑雪的家庭食谱</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="recipe-styles.css">
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fe1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .toggle-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .success-message {
+            background: #efe;
+            color: #080;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🚀 纸上滑雪的杂物间</h1>
+            <p class="subtitle">高质量工具和软件下载平台</p>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">🏠 首页</a>
+                <a href="recipes.html" class="nav-link active">🍳 家庭食谱</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🔐 登录/注册</h1>
+                <p id="formSubtitle">请登录以访问家庭食谱</p>
+            </div>
+
+            <!-- 登录表单 -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div id="message"></div>
+                
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required placeholder="请输入用户名">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required placeholder="请输入密码">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">🚪 登录</button>
+                    <button type="button" onclick="toggleToRegister()" class="btn btn-secondary">📝 注册新账户</button>
+                </div>
+            </form>
+
+            <!-- 注册表单 -->
+            <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
+                <div id="registerMessage"></div>
+                
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" name="username" required placeholder="请输入用户名">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" name="password" required placeholder="请输入密码（至少6位）">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="请再次输入密码">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">✅ 注册</button>
+                    <button type="button" onclick="toggleToLogin()" class="btn btn-secondary">🔙 返回登录</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 纸上滑雪的家庭食谱. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // 切换到注册表单
+        function toggleToRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('formSubtitle').textContent = '请注册新账户';
+        }
+
+        // 切换到登录表单
+        function toggleToLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('formSubtitle').textContent = '请登录以访问家庭食谱';
+        }
+
+        // 显示消息
+        function showMessage(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="${isError ? 'error-message' : 'success-message'}">${message}</div>`;
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 3000);
+        }
+
+        // 处理登录
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 保存用户信息到本地存储
+                    localStorage.setItem('recipe_user', JSON.stringify(result.user));
+                    localStorage.setItem('recipe_token', result.token);
+                    
+                    showMessage('message', '登录成功！正在跳转...', false);
+                    setTimeout(() => {
+                        window.location.href = 'recipes.html';
+                    }, 1000);
+                } else {
+                    showMessage('message', result.error, true);
+                }
+            } catch (error) {
+                showMessage('message', '登录失败，请重试', true);
+                console.error('登录错误:', error);
+            }
+        }
+
+        // 处理注册
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password.length < 6) {
+                showMessage('registerMessage', '密码长度至少为6位', true);
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('registerMessage', '两次输入的密码不一致', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage('registerMessage', '注册成功！请登录', false);
+                    setTimeout(() => {
+                        toggleToLogin();
+                    }, 1500);
+                } else {
+                    showMessage('registerMessage', result.error, true);
+                }
+            } catch (error) {
+                showMessage('registerMessage', '注册失败，请重试', true);
+                console.error('注册错误:', error);
+            }
+        }
+
+        // 检查是否已登录
+        function checkLogin() {
+            const user = localStorage.getItem('recipe_user');
+            if (user) {
+                window.location.href = 'recipes.html';
+            }
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = checkLogin;
+    </script>
+</main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 纸上滑雪的家庭食谱. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

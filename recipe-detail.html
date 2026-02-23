@@ -39,7 +39,18 @@
 
     <script src="recipe-api.js"></script>
     <script>
+        // 检查登录状态
+        function checkLogin() {
+            const user = localStorage.getItem('recipe_user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
         async function loadRecipeDetail() {
+            if (!checkLogin()) return;
             const params = new URLSearchParams(window.location.search);
             const recipeId = params.get('id');
             
@@ -159,6 +170,8 @@
         }
 
         async function toggleFavorite(recipeId) {
+            if (!checkLogin()) return;
+            
             try {
                 const isFavorite = await checkFavorite(recipeId);
                 if (isFavorite) {
@@ -176,10 +189,13 @@
         }
 
         function editRecipe(id) {
+            if (!checkLogin()) return;
             window.location.href = `create-recipe.html?id=${id}`;
         }
 
         async function deleteRecipe(id) {
+            if (!checkLogin()) return;
+            
             if (confirm('确定要删除这个食谱吗？此操作不可恢复。')) {
                 try {
                     await deleteRecipeAPI(id);
@@ -192,6 +208,13 @@
             }
         }
 
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('recipe_user');
+            localStorage.removeItem('recipe_token');
+            window.location.href = 'login.html';
+        }
+
         function showImage(url) {
             window.open(url, '_blank');
         }
@@ -201,7 +224,12 @@
             return date.toLocaleDateString('zh-CN');
         }
 
-        loadRecipeDetail();
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            if (checkLogin()) {
+                loadRecipeDetail();
+            }
+        };
     </script>
 </body>
 </html>

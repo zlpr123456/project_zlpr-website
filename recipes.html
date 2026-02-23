@@ -56,7 +56,19 @@
         let currentCategory = 'all';
         let currentSearch = '';
 
+        // 检查登录状态
+        function checkLogin() {
+            const user = localStorage.getItem('recipe_user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
         async function loadRecipes() {
+            if (!checkLogin()) return;
+            
             const grid = document.getElementById('recipesGrid');
             grid.innerHTML = '<div class="loading">加载中...</div>';
 
@@ -102,44 +114,46 @@
                 `).join('');
             } catch (error) {
                 console.error('加载食谱失败:', error);
-                grid.innerHTML = '<div class="error">加载失败，请刷新重试</div>';
+                grid.innerHTML = '<div class="error-state">加载失败，请重试</div>';
             }
         }
 
         function viewRecipe(id) {
+            if (!checkLogin()) return;
             window.location.href = `recipe-detail.html?id=${id}`;
         }
 
         function searchRecipes() {
+            if (!checkLogin()) return;
             currentSearch = document.getElementById('searchInput').value;
             loadRecipes();
         }
 
         function filterByCategory(category) {
+            if (!checkLogin()) return;
             currentCategory = category;
-            currentSearch = '';
-            document.getElementById('searchInput').value = '';
-            
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
             loadRecipes();
         }
 
         function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('zh-CN');
+            return new Date(dateString).toLocaleDateString('zh-CN');
         }
 
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchRecipes();
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('recipe_user');
+            localStorage.removeItem('recipe_token');
+            window.location.href = 'login.html';
+        }
+
+        // 页面加载时检查登录状态并加载食谱
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkLogin()) {
+                loadRecipes();
             }
         });
-
-        loadRecipes();
     </script>
 </body>
 </html>

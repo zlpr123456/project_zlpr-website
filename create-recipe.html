@@ -130,7 +130,19 @@
         let selectedImages = [];
         let editingRecipeId = null;
 
+        // 检查登录状态
+        function checkLogin() {
+            const user = localStorage.getItem('recipe_user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
         async function loadRecipeForEdit() {
+            if (!checkLogin()) return;
+            
             const params = new URLSearchParams(window.location.search);
             const recipeId = params.get('id');
             
@@ -170,6 +182,8 @@
         }
 
         function handleImageSelect(event) {
+            if (!checkLogin()) return;
+            
             const files = Array.from(event.target.files);
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             
@@ -216,6 +230,8 @@
         }
 
         function setCover(index) {
+            if (!checkLogin()) return;
+            
             selectedImages.forEach((img, i) => {
                 img.isCover = i === index;
             });
@@ -223,6 +239,8 @@
         }
 
         function removeImage(index) {
+            if (!checkLogin()) return;
+            
             selectedImages.splice(index, 1);
             if (selectedImages.length > 0 && !selectedImages.some(img => img.isCover)) {
                 selectedImages[0].isCover = true;
@@ -231,6 +249,8 @@
         }
 
         async function handleSubmit(event) {
+            if (!checkLogin()) return;
+            
             event.preventDefault();
             
             const formData = new FormData(event.target);
@@ -277,7 +297,19 @@
             }
         }
 
-        loadRecipeForEdit();
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('recipe_user');
+            localStorage.removeItem('recipe_token');
+            window.location.href = 'login.html';
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            if (checkLogin()) {
+                loadRecipeForEdit();
+            }
+        };
     </script>
 </body>
 </html>
