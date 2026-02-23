@@ -28,11 +28,19 @@ async function request(endpoint, options = {}) {
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || '请求失败');
+        try {
+            const error = await response.json();
+            throw new Error(error.error || '请求失败');
+        } catch (jsonError) {
+            throw new Error('请求失败: ' + response.statusText);
+        }
     }
 
-    return response.json();
+    try {
+        return await response.json();
+    } catch (jsonError) {
+        return {};
+    }
 }
 
 async function getAllRecipes() {
