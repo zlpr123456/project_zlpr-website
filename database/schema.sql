@@ -14,6 +14,15 @@ CREATE TABLE IF NOT EXISTS recipes (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 分类表
+CREATE TABLE IF NOT EXISTS categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  is_active BOOLEAN DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 收藏表
 CREATE TABLE IF NOT EXISTS favorites (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,7 +74,18 @@ CREATE INDEX IF NOT EXISTS idx_images_recipe_id ON images(recipe_id);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_invite_codes_code ON invite_codes(code);
 CREATE INDEX IF NOT EXISTS idx_invite_codes_active ON invite_codes(is_active);
+CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
+CREATE INDEX IF NOT EXISTS idx_categories_active ON categories(is_active);
 
 -- 插入默认邀请码
 INSERT OR IGNORE INTO invite_codes (code, is_active, used_count) 
 VALUES ('1201', 1, 0);
+
+-- 插入默认分类
+INSERT OR IGNORE INTO categories (name, is_active) VALUES ('家常菜', 1);
+INSERT OR IGNORE INTO categories (name, is_active) VALUES ('甜点', 1);
+INSERT OR IGNORE INTO categories (name, is_active) VALUES ('汤品', 1);
+INSERT OR IGNORE INTO categories (name, is_active) VALUES ('主食', 1);
+INSERT OR IGNORE INTO categories (name, is_active) VALUES ('凉菜', 1);
+INSERT OR IGNORE INTO categories (name, is_active) VALUES ('饮品', 1);
+INSERT OR IGNORE INTO categories (name, is_active) VALUES ('小吃', 1);

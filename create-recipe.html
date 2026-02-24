@@ -108,13 +108,7 @@
                         <div class="form-group">
                             <label for="category">分类</label>
                             <select id="category" name="category">
-                                <option value="">选择分类</option>
-                                <option value="家常菜">家常菜</option>
-                                <option value="甜点">甜点</option>
-                                <option value="汤品">汤品</option>
-                                <option value="主食">主食</option>
-                                <option value="凉菜">凉菜</option>
-                                <option value="饮品">饮品</option>
+                                <option value="">加载中...</option>
                             </select>
                         </div>
                     </div>
@@ -493,10 +487,32 @@
             window.location.href = 'login.html';
         }
 
+        // 加载分类列表
+        async function loadCategories() {
+            try {
+                const categories = await getCategories();
+                const categorySelect = document.getElementById('category');
+                
+                categorySelect.innerHTML = '<option value="">选择分类</option>';
+                
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.name;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载分类失败:', error);
+                const categorySelect = document.getElementById('category');
+                categorySelect.innerHTML = '<option value="">加载分类失败</option>';
+            }
+        }
+
         // 页面加载时检查登录状态
         window.onload = function() {
             if (checkLogin()) {
                 showUserInfo();
+                loadCategories();
                 loadRecipeForEdit();
             }
         };

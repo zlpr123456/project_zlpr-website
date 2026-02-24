@@ -95,12 +95,9 @@
                 <input type="text" id="searchInput" placeholder="搜索食谱..." class="search-input">
                 <button onclick="searchRecipes()" class="btn btn-primary">🔍 搜索</button>
             </div>
-            <div class="filter-buttons">
+            <div class="filter-buttons" id="filterButtons">
                 <button onclick="filterByCategory('all')" class="btn btn-secondary filter-btn active">全部</button>
-                <button onclick="filterByCategory('家常菜')" class="btn btn-secondary filter-btn">家常菜</button>
-                <button onclick="filterByCategory('甜点')" class="btn btn-secondary filter-btn">甜点</button>
-                <button onclick="filterByCategory('汤品')" class="btn btn-secondary filter-btn">汤品</button>
-                <button onclick="filterByCategory('主食')" class="btn btn-secondary filter-btn">主食</button>
+                <span class="loading">加载分类中...</span>
             </div>
         </section>
 
@@ -233,10 +230,37 @@
             window.location.href = 'login.html';
         }
 
+        // 加载分类列表
+        async function loadCategories() {
+            try {
+                const categories = await getCategories();
+                const filterButtonsContainer = document.getElementById('filterButtons');
+                
+                // 移除加载中状态
+                filterButtonsContainer.innerHTML = '<button onclick="filterByCategory(\'all\')" class="btn btn-secondary filter-btn active">全部</button>';
+                
+                // 添加分类按钮
+                categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-secondary filter-btn';
+                    button.textContent = category.name;
+                    button.onclick = function() {
+                        filterByCategory(category.name);
+                    };
+                    filterButtonsContainer.appendChild(button);
+                });
+            } catch (error) {
+                console.error('加载分类失败:', error);
+                const filterButtonsContainer = document.getElementById('filterButtons');
+                filterButtonsContainer.innerHTML = '<button onclick="filterByCategory(\'all\')" class="btn btn-secondary filter-btn active">全部</button><span class="error">加载分类失败</span>';
+            }
+        }
+
         // 页面加载时检查登录状态并加载食谱
         document.addEventListener('DOMContentLoaded', function() {
             if (checkLogin()) {
                 showUserInfo();
+                loadCategories();
                 loadRecipes();
             }
         });

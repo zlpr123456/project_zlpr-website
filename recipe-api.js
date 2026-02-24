@@ -85,6 +85,11 @@ async function getRecipesByCategory(category) {
     return result.recipes || [];
 }
 
+async function getCategories() {
+    const result = await request('/categories');
+    return result.categories || [];
+}
+
 async function getRecipeImages(recipeId) {
     const result = await request(`/recipes/${recipeId}/images`);
     return result.images || [];
@@ -159,38 +164,4 @@ async function deleteRecipeImage(recipeId, imageId) {
 // 暴露为全局函数，确保在HTML中可用
 if (typeof window !== 'undefined') {
     window.deleteRecipeImage = deleteRecipeImage;
-}
-
-async function getFavorites() {
-    const userId = getUserId();
-    const result = await request(`/favorites?user_id=${encodeURIComponent(userId)}`);
-    return result.recipes || [];
-}
-
-async function addFavorite(recipeId) {
-    const userId = getUserId();
-    await request('/favorites', {
-        method: 'POST',
-        body: {
-            recipe_id: recipeId,
-            user_id: userId
-        }
-    });
-}
-
-async function removeFavoriteAPI(recipeId) {
-    const userId = getUserId();
-    await request(`/favorites/${recipeId}?user_id=${encodeURIComponent(userId)}`, {
-        method: 'DELETE'
-    });
-}
-
-async function checkFavorite(recipeId) {
-    const userId = getUserId();
-    try {
-        const result = await request(`/favorites/check?recipe_id=${recipeId}&user_id=${encodeURIComponent(userId)}`);
-        return result.is_favorite || false;
-    } catch (error) {
-        return false;
-    }
 }
