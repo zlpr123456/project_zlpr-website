@@ -73,3 +73,42 @@ export async function onRequestPost(context) {
     });
   }
 }
+
+export async function onRequestDelete(context) {
+  const { env, request } = context;
+  
+  try {
+    const data = await request.json();
+    const recipeId = data.recipe_id;
+    const userId = data.user_id;
+    
+    if (!recipeId || !userId) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: '缺少必要参数'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    await env.DB.prepare(`
+      DELETE FROM favorites
+      WHERE recipe_id = ? AND user_id = ?
+    `).bind(recipeId, userId).run();
+    
+    return new Response(JSON.stringify({
+      success: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}

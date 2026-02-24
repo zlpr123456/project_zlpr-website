@@ -161,7 +161,38 @@ async function deleteRecipeImage(recipeId, imageId) {
     return true;
 }
 
+async function checkFavorite(recipeId) {
+    try {
+        const userId = getUserId();
+        const result = await request(`/favorites?user_id=${userId}`);
+        const recipes = result.recipes || [];
+        return recipes.some(recipe => recipe.id === parseInt(recipeId));
+    } catch (error) {
+        console.error('检查收藏失败:', error);
+        return false;
+    }
+}
+
+async function addFavorite(recipeId) {
+    const userId = getUserId();
+    await request('/favorites', {
+        method: 'POST',
+        body: { recipe_id: recipeId, user_id: userId }
+    });
+}
+
+async function removeFavorite(recipeId) {
+    const userId = getUserId();
+    await request('/favorites', {
+        method: 'DELETE',
+        body: { recipe_id: recipeId, user_id: userId }
+    });
+}
+
 // 暴露为全局函数，确保在HTML中可用
 if (typeof window !== 'undefined') {
     window.deleteRecipeImage = deleteRecipeImage;
+    window.checkFavorite = checkFavorite;
+    window.addFavorite = addFavorite;
+    window.removeFavorite = removeFavorite;
 }
