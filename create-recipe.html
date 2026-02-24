@@ -347,13 +347,43 @@
             `).join('');
         }
 
-        function setCover(index) {
+        async function setCover(index) {
             if (!checkLogin()) return;
             
-            selectedImages.forEach((img, i) => {
-                img.isCover = i === index;
-            });
-            updateImagePreview();
+            const img = selectedImages[index];
+            
+            if (img.id && editingRecipeId) {
+                try {
+                    const formData = new FormData();
+                    formData.append('action', 'set_cover');
+                    formData.append('imageId', img.id);
+
+                    const response = await fetch(
+                        `/api/recipes/${editingRecipeId}/images`,
+                        {
+                            method: 'POST',
+                            body: formData
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`Set cover failed: ${response.status}`);
+                    }
+                    
+                    selectedImages.forEach((img, i) => {
+                        img.isCover = i === index;
+                    });
+                    updateImagePreview();
+                } catch (error) {
+                    console.error('设置封面失败:', error);
+                    alert('设置封面失败，请重试');
+                }
+            } else {
+                selectedImages.forEach((img, i) => {
+                    img.isCover = i === index;
+                });
+                updateImagePreview();
+            }
         }
 
         async function removeImage(index) {

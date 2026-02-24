@@ -89,6 +89,50 @@ export async function onRequestPost(context) {
       });
     }
     
+    // 检查是否为设置封面操作
+    if (action === 'set_cover') {
+      const imageId = formData.get('imageId');
+      
+      if (!recipeId || !imageId) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: '缺少必要参数'
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      const image = await env.DB.prepare(
+        'SELECT id FROM images WHERE id = ? AND recipe_id = ?'
+      ).bind(imageId, recipeId).first();
+      
+      if (!image) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: '图片不存在'
+        }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      await env.DB.prepare(
+        'UPDATE images SET is_cover = 0 WHERE recipe_id = ?'
+      ).bind(recipeId).run();
+      
+      await env.DB.prepare(
+        'UPDATE images SET is_cover = 1 WHERE id = ? AND recipe_id = ?'
+      ).bind(imageId, recipeId).run();
+      
+      return new Response(JSON.stringify({
+        success: true,
+        message: '封面设置成功'
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     // 原有的上传逻辑
     const file = formData.get('file');
     const thumbnail = formData.get('thumbnail');
