@@ -155,7 +155,7 @@
                                 `<img src="${recipe.cover_image}" alt="${recipe.title}" onerror="this.src='https://via.placeholder.com/400x300?text=暂无图片'">` :
                                 `<div class="no-image">暂无图片</div>`
                             }
-                            <div class="recipe-badge">${recipe.difficulty}</div>
+                            <div class="recipe-badge">${recipe.difficulty || '未知'}</div>
                         </div>
                         <div class="recipe-info">
                             <h3 class="recipe-title">${recipe.title}</h3>
